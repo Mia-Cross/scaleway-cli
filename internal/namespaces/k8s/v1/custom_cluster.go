@@ -89,6 +89,12 @@ func clusterCreateBuilder(c *core.Command) *core.Command {
 	c.ArgSpecs.GetByName("cni").Default = core.DefaultValueSetter("cilium")
 	c.ArgSpecs.GetByName("version").Default = core.DefaultValueSetter("latest")
 
+	c.ArgSpecs.GetByName("type").EnumValues = []string{"kapsule", "multicloud"}
+	c.ArgSpecs.GetByName("type").ValidateFunc = func(argSpec *core.ArgSpec, value interface{}) error {
+		// Allow all types
+		return nil
+	}
+
 	c.Interceptor = func(ctx context.Context, argsI interface{}, runner core.CommandRunner) (interface{}, error) {
 		args := argsI.(*k8s.CreateClusterRequest)
 
