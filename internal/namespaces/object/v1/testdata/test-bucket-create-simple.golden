@@ -1,0 +1,8 @@
+🎲🎲🎲 EXIT CODE: 0 🎲🎲🎲
+🟩🟩🟩 STDOUT️ 🟩🟩🟩️
+✅ Bucket successfully created.
+🟩🟩🟩 JSON STDOUT 🟩🟩🟩
+{
+  "message": "Bucket successfully created",
+  "details": ""
+}
