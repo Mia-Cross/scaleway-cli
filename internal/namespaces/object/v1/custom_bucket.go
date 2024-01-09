@@ -2,10 +2,10 @@ package object
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/minio/minio-go/v7"
 	"github.com/scaleway/scaleway-cli/v2/internal/core"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
@@ -34,27 +34,36 @@ func bucketCreateCommand() *core.Command {
 		},
 		Run: func(ctx context.Context, argsI interface{}) (interface{}, error) {
 			args := argsI.(*objectBucketBasicArgs)
-			s3client := newS3Client(ctx, args.Region)
 
-			bucket, err := s3client.CreateBucket(ctx, &s3.CreateBucketInput{
-				Bucket: &args.Name,
-				//ACL:                        "",
-				CreateBucketConfiguration: &types.CreateBucketConfiguration{
-					LocationConstraint: types.BucketLocationConstraint(args.Region),
-				},
-				ObjectLockEnabledForBucket: scw.BoolPtr(true),
+			minioClient := newMinioClient(ctx, args.Region)
+			if minioClient == nil {
+				return nil, fmt.Errorf("failed to create client")
+			}
+			err := minioClient.MakeBucket(ctx, args.Name, minio.MakeBucketOptions{
+				Region:        args.Region.String(),
+				ObjectLocking: false,
 			})
+
+			//s3client := newS3Client(ctx, args.Region)
+			//bucket, err := s3client.CreateBucket(ctx, &s3.CreateBucketInput{
+			//	Bucket: &args.Name,
+			//	//ACL:                        "",
+			//	CreateBucketConfiguration: &types.CreateBucketConfiguration{
+			//		LocationConstraint: types.BucketLocationConstraint(args.Region),
+			//	},
+			//	ObjectLockEnabledForBucket: scw.BoolPtr(true),
+			//})
 			if err != nil {
 				return nil, err
 			}
 
 			return &core.SuccessResult{
-				Message:        "Bucket successfully created",
-				Details:        "",
-				Resource:       "",
-				Verb:           "",
-				Empty:          false,
-				TargetResource: bucket,
+				Message:  "Bucket successfully created",
+				Details:  "",
+				Resource: "",
+				Verb:     "",
+				Empty:    false,
+				//TargetResource: bucket,
 			}, nil
 		},
 	}
@@ -79,12 +88,18 @@ func bucketDeleteCommand() *core.Command {
 		},
 		Run: func(ctx context.Context, argsI interface{}) (interface{}, error) {
 			args := argsI.(*objectBucketBasicArgs)
-			s3client := newS3Client(ctx, args.Region)
 
-			_, err := s3client.DeleteBucket(ctx, &s3.DeleteBucketInput{
-				Bucket: &args.Name,
-				//ExpectedBucketOwner: nil,
-			})
+			minioClient := newMinioClient(ctx, args.Region)
+			if minioClient == nil {
+				return nil, fmt.Errorf("failed to create client")
+			}
+			err := minioClient.RemoveBucket(ctx, args.Name)
+
+			//s3client := newS3Client(ctx, args.Region)
+			//_, err := s3client.DeleteBucket(ctx, &s3.DeleteBucketInput{
+			//	Bucket: &args.Name,
+			//	//ExpectedBucketOwner: nil,
+			//})
 			if err != nil {
 				return nil, err
 			}
