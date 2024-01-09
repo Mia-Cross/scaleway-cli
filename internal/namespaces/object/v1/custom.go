@@ -8,6 +8,12 @@ func GetCommands() *core.Commands {
 	return core.NewCommands(
 		objectRoot(),
 		objectConfig(),
+		bucketCreateCommand(),
+		bucketDeleteCommand(),
+		bucketGetCommand(),
+		bucketUpdateCommand(),
+		bucketEnableVersioningCommand(),
+		bucketDisableVersioningCommand(),
 		configGetCommand(),
 		configInstallCommand(),
 	)
